@@ -140,13 +140,13 @@ class _LandingPageState extends State<LandingPage>
                   child: Column(
                     children: [
                       _LandingButton(
-                        label: 'admin',
-                        onTap: () => _navigateTo(const AdminHomepage()),
+                        label: 'enter app',
+                        onTap: () => _navigateTo(const UserHomepage()),
                       ),
                       const SizedBox(height: 14),
                       _LandingButton(
-                        label: 'enter app',
-                        onTap: () => _navigateTo(const UserHomepage()),
+                        label: 'admin',
+                        onTap: () => _navigateTo(const AdminHomepage()),
                       ),
                     ],
                   ),
