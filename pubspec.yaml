@@ -1,19 +1,22 @@
 name: kaon_sa_kuan
-description: "A new Flutter project."
+description: Kaon sa Kuan food decision app.
 publish_to: 'none'
-version: 0.1.0+1
+version: 1.0.0+1
 
 environment:
-  sdk: ^3.11.4
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0
+  flutter_lints: ^3.0.0
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/pig_mascot.png
