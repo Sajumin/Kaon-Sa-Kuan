@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'user/user_homepage.dart';
-import 'admin/admin_homepage.dart';
+import 'package:kaon_sa_kuan/screens/admin/admin_login.dart';
+import 'package:kaon_sa_kuan/screens/user/user_homepage.dart';
+import 'package:kaon_sa_kuan/backend/services/auth_service.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -140,13 +141,18 @@ class _LandingPageState extends State<LandingPage>
                   child: Column(
                     children: [
                       _LandingButton(
-                        label: 'enter app',
-                        onTap: () => _navigateTo(const UserHomepage()),
-                      ),
+                          label: 'enter app',
+                          onTap: () async {
+                            await AuthService().signInAnonymously();
+
+                            if (mounted) {
+                              _navigateTo(const UserHomepage());
+                            }
+                          }),
                       const SizedBox(height: 14),
                       _LandingButton(
                         label: 'admin',
-                        onTap: () => _navigateTo(const AdminHomepage()),
+                        onTap: () => _navigateTo(const AdminLoginScreen()),
                       ),
                     ],
                   ),
