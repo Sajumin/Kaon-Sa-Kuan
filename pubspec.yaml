@@ -1,14 +1,17 @@
 name: kaon_sa_kuan
 description: Kaon sa Kuan food decision app.
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
+  cloud_firestore: ^6.3.0
+  firebase_core: ^4.7.0
   flutter:
     sdk: flutter
+  flutter_dotenv: ^6.0.1
   google_fonts: ^6.2.1
 
 dev_dependencies:
@@ -19,4 +22,5 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - .env
     - assets/images/pig_mascot.png
