@@ -1,219 +1,203 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'admin_approval.dart';
-import 'admin_reports.dart';
-import 'admin_post.dart';
+import 'package:kaon_sa_kuan/widgets/admin_nav_bar.dart';
 
-class AdminHomepage extends StatelessWidget {
-  const  AdminHomepage({super.key});
-  final Color citrusOrange = const Color(0xFFF05A28);
-  final Color citrusGreen = const Color(0xFF8BC34A);
-  final Color darkBrown = const Color(0xFF3B2F2F);
-  final Color creamBase = const Color(0xFFFFF3D6);
+class AdminHomepage extends StatefulWidget {
+  const AdminHomepage({super.key});
 
-  final List<Map<String, dynamic>> testRestaurants = const [
-    {
-      "name": "Manang Betch",
-      "location": "CUB, Stall #2",
-      "price": "Php 5 - Php 100",
-      "tags": ["lunch", "chicken", "pork"],
-      "image": "" 
-    },
-    {
-      "name": "Vineyard",
-      "location": "Brgy. Tacas, Miagao",
-      "price": "Php 150 - Php 250",
-      "tags": ["dinner", "beef", "fried"],
-      "image": ""
-    },
-    {
-      "name": "Beans and Bubbles",
-      "location": "Brgy. Mat-y",
-      "price": "Php 80 - Php 180",
-      "tags": ["cafe", "coffee", "dessert"],
-      "image": ""
-    },
-  ];
+  @override
+  State<AdminHomepage> createState() => _AdminHomepageState();
+}
+
+class _AdminHomepageState extends State<AdminHomepage> {
+  static const Color warmTangerine = Color(0xFFF47B42);
+
+  int _currentIndex = 0;
+  final TextEditingController _searchController = TextEditingController();
+
+  // Placeholder: replace with actual restaurant data from Firestore
+  final List<Map<String, dynamic>> _restaurants = [];
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onNavTap(int index) {
+    if (index == _currentIndex) return;
+    setState(() => _currentIndex = index);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      bottomNavigationBar: AdminNavBar(
+        currentIndex: _currentIndex,
+        onTap: _onNavTap,
+      ),
       body: Column(
         children: [
           Container(
-            padding: const EdgeInsets.only(top: 20, left: 5, right: 5, bottom: 5),
-            decoration: BoxDecoration(
-              color: citrusGreen,
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(0),
-                bottomRight: Radius.circular(0),
-              ),
-            ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children:[
-                Align(
-                  alignment: Alignment.topRight,
-                  child: //IconButton(
-                    Icon(Icons.exit_to_app, color: Colors.black, size: 20),
-                    //onPressed: () => Navigator.pop(context); 
-                  //),
-                ), 
-                Text(
-                  "Hello, Admin.",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white
-                  ),
-                ),
-                Text(
-                  "What would you like to do today?",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white
-                  ),
-                ),
-              ],
-            ),
-          ),
-          //Search Bar 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: "search for restaurant...",
-                prefixIcon: const Icon(Icons.search, color: Color.fromARGB(255, 16, 17, 16)),
-                suffixIcon: const Icon(Icons.tune, color: Color.fromARGB(255, 5, 5, 5)),
-                filled: true,
-                fillColor: citrusGreen.withOpacity(0.7),
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ),
-
-          // Restuarants List
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              itemCount: testRestaurants.length, // Placeholder count
-              itemBuilder: (context, index) {
-                return _buildRestaurantCard(testRestaurants[index]);
-              },
-            ),
-          ),
-        ],
-      ),
-      
-      // navigation bar 
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: darkBrown,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
-        selectedFontSize: 12,
-        unselectedFontSize: 12,
-        
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AdminHomepage()));
-              break; 
-            case 1:
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AdminApprovals()));
-              break;
-            case 2:
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AdminPost()));
-              break;
-            case 3:
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const AdminReports()));
-              break;
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'home'),
-          BottomNavigationBarItem(icon: Icon(Icons.assignment_outlined), label: 'pending restos'),
-          BottomNavigationBarItem(icon: Icon(Icons.add_box), label: 'add new'),
-          BottomNavigationBarItem(icon: Icon(Icons.flag_outlined), label: 'view reports'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRestaurantCard(Map<String, dynamic> data) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: citrusOrange,
-        borderRadius: BorderRadius.circular(35),
-      ),
-      child: Row(
-        children: [
-          // Black Circle Placeholder for Image
-          const CircleAvatar(
-            radius: 35,
-            backgroundColor: Colors.black,
-          ),
-          const SizedBox(width: 15),
-          // Info Column
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            width: double.infinity,
+            color: warmTangerine,
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      data['name'] ?? "New Resto",
-                      style: const TextStyle(
-                        fontSize: 18,
+                      'Good day, Admin Kuan.',
+                      style: TextStyle(
+                        fontFamily: 'Afacad',
+                        fontSize: 22,
+                        color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        letterSpacing: 0.3,
                       ),
                     ),
-                    const Row(
-                      children: [
-                        Icon(Icons.edit_note, size: 20),
-                        Icon(Icons.delete_outline, size: 20),
-                      ],
+                    const SizedBox(height: 2),
+                    Text(
+                      'What would you like to do?',
+                      style: TextStyle(
+                        fontFamily: 'Afacad',
+                        fontSize: 16,
+                        color: Colors.white.withOpacity(0.88),
+                        letterSpacing: 0.2,
+                      ),
                     ),
                   ],
                 ),
-                Text("📍 ${data['location']}"),
-                Text("💵 ${data['price']}"),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 5,
-                  runSpacing: 5, // Adds spacing if tags wrap to a new line
-                  children: (data['tags'] as List<String>)
-                      .map((tag) => _buildTag(tag))
-                      .toList(),
+              ),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+            child: Row(
+              children: [
+                // Search Bar
+                Expanded(
+                  child: Container(
+                    height: 45,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: _searchController,
+                      style: const TextStyle(
+                        fontFamily: 'Afacad', 
+                        fontSize: 15,
+                        color: Color(0xFF5A3E2B),
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'search for restaurant...',
+                        hintStyle: TextStyle(
+                          fontFamily: 'Afacad',
+                          fontSize: 15,
+                          color: const Color(0xFF5A3E2B).withOpacity(0.45),
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.search, 
+                          color: warmTangerine,
+                          size: 22,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Icon(
+                  Icons.tune_rounded, 
+                  color: warmTangerine,
+                  size: 28,
                 ),
               ],
+            ),
+          ),
+
+          // Body / Empty State
+          Expanded(
+            child: _restaurants.isEmpty
+                ? const _EmptyState()
+                : _RestaurantList(restaurants: _restaurants),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.storefront_outlined,
+            size: 72,
+            color: const Color(0xFFF47B42).withOpacity(0.25),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No restaurants yet.',
+            style: TextStyle(
+              fontFamily: 'AdlamDisplay', 
+              fontSize: 16,
+              color: const Color(0xFF5A3E2B).withOpacity(0.45),
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildTag(String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-      decoration: BoxDecoration(
-        color: citrusGreen,
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-      ),
+class _RestaurantList extends StatelessWidget {
+  final List<Map<String, dynamic>> restaurants;
+  const _RestaurantList({required this.restaurants});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsets.all(20),
+      itemCount: restaurants.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final resto = restaurants[index];
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF0E8E2),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Text(
+            resto['name'] ?? 'Restaurant',
+            style: const TextStyle(
+              fontFamily: 'Afacad', 
+              fontSize: 15,
+              color: Color(0xFF5A3E2B),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        );
+      },
     );
   }
 }

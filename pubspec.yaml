@@ -13,7 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_dotenv: ^6.0.1
-  google_fonts: ^6.2.1
+  google_fonts: ^8.1.0
 
 dev_dependencies:
   flutter_test:
@@ -25,3 +25,10 @@ flutter:
   assets:
     - .env
     - assets/images/pig_mascot.png
+  fonts:
+    - family: AdlamDisplay
+      fonts:
+        - asset: assets/fonts/ADLaMDisplay-Regular.ttf
+    - family: Afacad
+      fonts:
+        - asset: assets/fonts/Afacad-VariableFont_wght.ttf

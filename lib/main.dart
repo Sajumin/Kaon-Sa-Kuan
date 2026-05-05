@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'screens/landing_page.dart';
+import 'package:kaon_sa_kuan/screens/auth/landing.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,8 +26,9 @@ class KaonSaKuanApp extends StatelessWidget {
       title: 'Kaon sa Kuan',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF8BC349)),
-        useMaterial3: true,
+        textTheme: GoogleFonts.afacadTextTheme(
+          Theme.of(context).textTheme,
+        ),
       ),
       home: const LandingPage(),
     );
