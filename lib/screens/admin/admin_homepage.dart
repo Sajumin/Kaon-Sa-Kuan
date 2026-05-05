@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kaon_sa_kuan/widgets/admin_nav_bar.dart';
+import 'package:kaon_sa_kuan/screens/admin/admin_add_new.dart';
 
 class AdminHomepage extends StatefulWidget {
   const AdminHomepage({super.key});
@@ -25,6 +26,13 @@ class _AdminHomepageState extends State<AdminHomepage> {
 
   void _onNavTap(int index) {
     if (index == _currentIndex) return;
+    if (index == 2) { 
+    Navigator.push(
+      context, 
+      MaterialPageRoute(builder: (_) => const AddNewResto())
+    );
+    return; 
+  }
     setState(() => _currentIndex = index);
   }
 
