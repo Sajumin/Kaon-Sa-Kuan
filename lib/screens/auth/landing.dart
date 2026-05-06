@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kaon_sa_kuan/backend/services/auth_service.dart';
-import 'package:kaon_sa_kuan/screens/admin/admin_homepage.dart';
+import 'package:kaon_sa_kuan/screens/admin/admin_main_screen.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -42,7 +42,7 @@ class _LandingPageState extends State<LandingPage> {
     if (user != null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const AdminHomepage()),
+        MaterialPageRoute(builder: (_) => const AdminMainScreen()), 
       );
     } else {  
       _showSnack('Invalid email or password.');
