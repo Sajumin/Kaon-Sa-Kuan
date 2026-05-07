@@ -20,6 +20,12 @@ class RestaurantController {
       throw Exception("Restaurant name is required");
     }
 
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null) {
+      throw Exception("You must be logged in to add a restaurant.");
+    }
+
     final restaurant = RestaurantModel(
       id: '',
       name: name,
