@@ -19,7 +19,7 @@ dependencies {
 }
 
 android {
-    namespace = "com.example.kaon_sa_kuan"
+    namespace = "com.sajumin.kaon_sa_kuan"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -34,7 +34,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.kaon_sa_kuan"
+        applicationId = "com.sajumin.kaon_sa_kuan"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

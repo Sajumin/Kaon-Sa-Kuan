@@ -1,4 +1,4 @@
-package com.example.kaon_sa_kuan
+package com.sajumin.kaon_sa_kuan
 
 import io.flutter.embedding.android.FlutterActivity
 
