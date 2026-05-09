@@ -3,13 +3,14 @@ import 'package:kaon_sa_kuan/screens/admin/admin_resto_details.dart';
 import 'package:kaon_sa_kuan/screens/admin/admin_edit_resto.dart';
 import 'package:kaon_sa_kuan/backend/services/auth_service.dart';
 import 'package:kaon_sa_kuan/screens/auth/landing.dart';
+import 'package:kaon_sa_kuan/widgets/admin/admin_app_colors.dart';
+import 'package:kaon_sa_kuan/widgets/admin/admin_confirm_modal.dart';
+import 'package:kaon_sa_kuan/widgets/admin/admin_resto_card.dart';
 
 class AdminHomepage extends StatelessWidget {
   const AdminHomepage({super.key});
 
-  static const Color warmTangerine = Color(0xFFF47B42);
-
-  // Hardcoded Restaurant Data
+  // Hardcoded restaurant data
   final Map<String, dynamic> susansResto = const {
     "name": "Susan's",
     "foodCategory": "Full Meal",
@@ -21,18 +22,17 @@ class AdminHomepage extends StatelessWidget {
     "openTime": "06:00",
     "closeTime": "20:00",
     "mealTags": ["Breakfast", "Lunch", "Dinner"],
-    "description":
-        "Affordable silog and karinderya meals for students and locals."
+    "description": "Affordable silog and karinderya meals for students and locals.",
   };
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Header
+        // ── Header ────────────────────────────────────────────────────────
         Container(
           width: double.infinity,
-          color: warmTangerine,
+          color: kWarmTangerine,
           child: SafeArea(
             bottom: false,
             child: Padding(
@@ -74,8 +74,7 @@ class AdminHomepage extends StatelessWidget {
                         );
                       }
                     },
-                    icon:
-                        const Icon(Icons.logout_rounded, color: Colors.white),
+                    icon: const Icon(Icons.logout_rounded, color: Colors.white),
                   ),
                 ],
               ),
@@ -83,7 +82,7 @@ class AdminHomepage extends StatelessWidget {
           ),
         ),
 
-        // Search Bar
+        // ── Search Bar ────────────────────────────────────────────────────
         Padding(
           padding: const EdgeInsets.all(20),
           child: Row(
@@ -94,17 +93,18 @@ class AdminHomepage extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                           color: Colors.black12,
                           blurRadius: 8,
-                          offset: const Offset(0, 2)),
+                          offset: Offset(0, 2)),
                     ],
                   ),
                   child: const TextField(
                     decoration: InputDecoration(
                       hintText: 'search for restaurant...',
-                      prefixIcon: Icon(Icons.search, color: warmTangerine),
+                      prefixIcon:
+                          Icon(Icons.search, color: kWarmTangerine),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(vertical: 10),
                     ),
@@ -112,22 +112,24 @@ class AdminHomepage extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const Icon(Icons.tune_rounded, color: warmTangerine, size: 28),
+              const Icon(Icons.tune_rounded,
+                  color: kWarmTangerine, size: 28),
             ],
           ),
         ),
 
-        // Restaurant List
+        // ── Restaurant List ───────────────────────────────────────────────
         Expanded(
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             children: [
-              _RestoCard(
+              AdminRestoCard(
                 data: susansResto,
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => AdminRestoDetails(resto: susansResto),
+                    builder: (_) =>
+                        AdminRestoDetails(resto: susansResto),
                   ),
                 ),
                 onEdit: () => showEditRestoModal(
@@ -150,314 +152,20 @@ class AdminHomepage extends StatelessWidget {
   void _showDeleteModal(BuildContext context, String restoName) {
     showDialog(
       context: context,
-      builder: (_) => _ConfirmModal(
+      builder: (_) => AdminConfirmModal(
         icon: Icons.delete_outline_rounded,
-        iconColor: const Color(0xFFE91E63),
-        iconBgColor: const Color(0xFFFCE4EC),
+        iconColor: kDeletePink,
+        iconBgColor: kDeletePinkBg,
         title: 'Remove This Resto?',
         message:
             '"$restoName" will be permanently removed from the list. This can\'t be undone.',
         confirmLabel: 'Yes, delete it.',
-        confirmColor: const Color(0xFFE91E63),
-        confirmBgColor: const Color(0xFFFCE4EC),
+        confirmColor: kDeletePink,
+        confirmBgColor: kDeletePinkBg,
         onConfirm: () {
           Navigator.pop(context);
           // TODO: handle delete logic
         },
-      ),
-    );
-  }
-}
-
-class _RestoCard extends StatelessWidget {
-  final Map<String, dynamic> data;
-  final VoidCallback onTap;
-  final VoidCallback? onEdit;
-  final VoidCallback? onDelete;
-
-  const _RestoCard({
-    required this.data,
-    required this.onTap,
-    this.onEdit,
-    this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final String priceRange =
-        'Php ${data['averageCostMin']} – Php ${data['averageCostMax']}';
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: const Color(0xFFF9C06A),
-            width: 1.5,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image Area
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(18)),
-                  child: Container(
-                    width: double.infinity,
-                    height: 160,
-                    color: Colors.white,
-                    child: Center(
-                      child: Icon(
-                        Icons.image_outlined,
-                        size: 52,
-                        color: Colors.black.withOpacity(0.15),
-                      ),
-                    ),
-                  ),
-                ),
-                // Edit & Delete buttons
-                Positioned(
-                  top: 10,
-                  right: 10,
-                  child: Row(
-                    children: [
-                      _IconChip(icon: Icons.edit_outlined, onTap: onEdit),
-                      const SizedBox(width: 5),
-                      _IconChip(icon: Icons.delete_outline, onTap: onDelete),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            Container(
-              height: 1.5,
-              color: const Color(0xFFF9C06A),
-            ),
-
-            Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFFFFF5F0),
-                borderRadius:
-                    BorderRadius.vertical(bottom: Radius.circular(18)),
-              ),
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    data['name'],
-                    style: const TextStyle(
-                      fontFamily: 'Afacad',
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on_outlined,
-                          size: 15, color: Color(0xFFF47B42)),
-                      const SizedBox(width: 3),
-                      Text(
-                        data['location'],
-                        style: const TextStyle(
-                          fontFamily: 'Afacad',
-                          fontSize: 20,
-                          color: Color(0xFFF47B42),
-                        ),
-                      ),
-                      const Spacer(),
-                      const Icon(Icons.receipt_outlined,
-                          size: 15, color: Color(0xFFF47B42)),
-                      const SizedBox(width: 3),
-                      Text(
-                        priceRange,
-                        style: const TextStyle(
-                          fontFamily: 'Afacad',
-                          fontSize: 20,
-                          color: Color(0xFFF47B42),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _IconChip extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback? onTap;
-
-  const _IconChip({required this.icon, this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.90),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: const Color(0xFFF9C06A),
-            width: 1,
-          ),
-        ),
-        child: Icon(icon, size: 24, color: Colors.black87),
-      ),
-    );
-  }
-}
-
-// ─── Shared Confirmation Modal ───────────────────────────────────────────────
-
-class _ConfirmModal extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final Color iconBgColor;
-  final String title;
-  final String message;
-  final String confirmLabel;
-  final Color confirmColor;
-  final Color confirmBgColor;
-  final VoidCallback onConfirm;
-
-  const _ConfirmModal({
-    required this.icon,
-    required this.iconColor,
-    required this.iconBgColor,
-    required this.title,
-    required this.message,
-    required this.confirmLabel,
-    required this.confirmColor,
-    required this.confirmBgColor,
-    required this.onConfirm,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      backgroundColor: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Icon badge
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: iconBgColor,
-                shape: BoxShape.circle,
-                border:
-                    Border.all(color: iconColor.withOpacity(0.3), width: 2),
-              ),
-              child: Icon(icon, color: iconColor, size: 32),
-            ),
-            const SizedBox(height: 16),
-
-            // Title
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'Afacad',
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 10),
-
-            // Message
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Afacad',
-                fontSize: 15,
-                color: Colors.black.withOpacity(0.5),
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Buttons
-            Row(
-              children: [
-                // Cancel
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF5F5F5),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                            color: Colors.black.withOpacity(0.1), width: 1.5),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'Cancel',
-                          style: TextStyle(
-                            fontFamily: 'Afacad',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                // Confirm
-                Expanded(
-                  child: GestureDetector(
-                    onTap: onConfirm,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: confirmBgColor,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: confirmColor, width: 1.5),
-                      ),
-                      child: Center(
-                        child: Text(
-                          confirmLabel,
-                          style: TextStyle(
-                            fontFamily: 'Afacad',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: confirmColor,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }

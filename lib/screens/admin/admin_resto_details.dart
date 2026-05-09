@@ -1,24 +1,20 @@
 import 'package:flutter/material.dart';
-
-const Color _tangerine = Color(0xFFF47B42);
+import 'package:kaon_sa_kuan/widgets/admin/admin_app_colors.dart';
 
 class AdminRestoDetails extends StatelessWidget {
   final Map<String, dynamic> resto;
 
-  const AdminRestoDetails({
-    super.key,
-    required this.resto,
-  });
+  const AdminRestoDetails({super.key, required this.resto});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
-          // Orange Header with back button
+          // Orange header with back button
           Container(
             width: double.infinity,
-            color: _tangerine,
+            color: kWarmTangerine,
             child: SafeArea(
               bottom: false,
               child: Padding(
@@ -51,13 +47,17 @@ class AdminRestoDetails extends StatelessWidget {
               padding: const EdgeInsets.all(20),
               children: [
                 _infoTile("Category", resto['foodCategory']),
-                _infoTile("Food Types", (resto['foodType'] as List).join(", ")),
+                _infoTile("Food Types",
+                    (resto['foodType'] as List).join(", ")),
                 _infoTile("Price Range",
                     "₱${resto['averageCostMin']} - ₱${resto['averageCostMax']}"),
-                _infoTile("Budget Tags", (resto['budgetTags'] as List).join(", ")),
+                _infoTile("Budget Tags",
+                    (resto['budgetTags'] as List).join(", ")),
                 _infoTile("Location", resto['location']),
-                _infoTile("Hours", "${resto['openTime']} - ${resto['closeTime']}"),
-                _infoTile("Meals", (resto['mealTags'] as List).join(", ")),
+                _infoTile("Hours",
+                    "${resto['openTime']} - ${resto['closeTime']}"),
+                _infoTile("Meals",
+                    (resto['mealTags'] as List).join(", ")),
                 _infoTile("Description", resto['description']),
               ],
             ),
@@ -78,7 +78,7 @@ class AdminRestoDetails extends StatelessWidget {
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
-              color: _tangerine,
+              color: kWarmTangerine,
               fontFamily: 'Afacad',
             ),
           ),

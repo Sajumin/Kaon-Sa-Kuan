@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:kaon_sa_kuan/widgets/admin/admin_app_colors.dart';
+import 'package:kaon_sa_kuan/widgets/admin/admin_form_fields.dart';
+import 'package:kaon_sa_kuan/widgets/admin/admin_tag_selector.dart';
 
-//   showEditRestoModal(context, data: susansResto, onSave: (updated) { ... });
-//
+/// Opens the edit bottom sheet.
+///
+/// ```dart
+/// showEditRestoModal(context, data: susansResto, onSave: (updated) { ... });
+/// ```
 void showEditRestoModal(
   BuildContext context, {
   required Map<String, dynamic> data,
@@ -15,6 +21,7 @@ void showEditRestoModal(
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _EditRestoSheet extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -27,25 +34,14 @@ class _EditRestoSheet extends StatefulWidget {
 }
 
 class _EditRestoSheetState extends State<_EditRestoSheet> {
-  static const Color warmTangerine = Color(0xFFF47B42);
-
-  final List<String> _tagList = [
-    'Breakfast', 'Streetfood', 'Coffee', 'Lunch', 'Drinks', 'Pastry',
-    'Dinner', 'Sushi', 'Pasta', 'Merienda', 'Noodles', 'Pizza',
-    'Chicken', 'BBQ / Grill', 'Veggies', 'Pork', 'Samgyup', 'Fish',
-    'Silog', 'Soup', 'Seafood',
-  ];
-
-  bool _showTags = false;
-
-  late TextEditingController _nameCtrl;
-  late TextEditingController _descCtrl;
-  late TextEditingController _locationCtrl;
-  late TextEditingController _minPriceCtrl;
-  late TextEditingController _maxPriceCtrl;
-  late TextEditingController _openCtrl;
-  late TextEditingController _closeCtrl;
-  late TextEditingController _fbCtrl;
+  late final TextEditingController _nameCtrl;
+  late final TextEditingController _descCtrl;
+  late final TextEditingController _locationCtrl;
+  late final TextEditingController _minPriceCtrl;
+  late final TextEditingController _maxPriceCtrl;
+  late final TextEditingController _openCtrl;
+  late final TextEditingController _closeCtrl;
+  late final TextEditingController _fbCtrl;
   late Set<String> _selectedTags;
 
   @override
@@ -61,7 +57,7 @@ class _EditRestoSheetState extends State<_EditRestoSheet> {
     _closeCtrl    = TextEditingController(text: d['closeTime'] ?? '');
     _fbCtrl       = TextEditingController(text: d['facebookPage'] ?? '');
 
-    // Seed selected tags from mealTags + foodType combined
+    // Seed tags from mealTags + foodType
     final existing = <String>{};
     if (d['mealTags'] is List) {
       for (final t in d['mealTags']) existing.add(t.toString());
@@ -86,16 +82,19 @@ class _EditRestoSheetState extends State<_EditRestoSheet> {
   }
 
   void _handleSave() {
-    final updated = Map<String, dynamic>.from(widget.data);
-    updated['name']           = _nameCtrl.text.trim();
-    updated['description']    = _descCtrl.text.trim();
-    updated['location']       = _locationCtrl.text.trim();
-    updated['averageCostMin'] = int.tryParse(_minPriceCtrl.text.trim()) ?? updated['averageCostMin'];
-    updated['averageCostMax'] = int.tryParse(_maxPriceCtrl.text.trim()) ?? updated['averageCostMax'];
-    updated['openTime']       = _openCtrl.text.trim();
-    updated['closeTime']      = _closeCtrl.text.trim();
-    updated['facebookPage']   = _fbCtrl.text.trim();
-    updated['mealTags']       = _selectedTags.toList();
+    final updated = Map<String, dynamic>.from(widget.data)
+      ..['name']           = _nameCtrl.text.trim()
+      ..['description']    = _descCtrl.text.trim()
+      ..['location']       = _locationCtrl.text.trim()
+      ..['averageCostMin'] = int.tryParse(_minPriceCtrl.text.trim()) ??
+          widget.data['averageCostMin']
+      ..['averageCostMax'] = int.tryParse(_maxPriceCtrl.text.trim()) ??
+          widget.data['averageCostMax']
+      ..['openTime']       = _openCtrl.text.trim()
+      ..['closeTime']      = _closeCtrl.text.trim()
+      ..['facebookPage']   = _fbCtrl.text.trim()
+      ..['mealTags']       = _selectedTags.toList();
+
     Navigator.pop(context);
     widget.onSave(updated);
   }
@@ -105,7 +104,6 @@ class _EditRestoSheetState extends State<_EditRestoSheet> {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
-      // Takes up most of the screen height
       height: MediaQuery.of(context).size.height * 0.92,
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -113,207 +111,67 @@ class _EditRestoSheetState extends State<_EditRestoSheet> {
       ),
       child: Column(
         children: [
-          _SheetHeader(),
+          const _SheetHeader(),
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(20, 4, 20, bottomInset + 24),
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  border: Border.all(color: warmTangerine, width: 1),
+                  border: Border.all(color: kWarmTangerine, width: 1),
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildLabel('Restaurant Name'),
-                    _buildTextField(_nameCtrl, 'Type restaurant name...'),
+                    buildFormLabel('Restaurant Name'),
+                    buildFormTextField('Type restaurant name...',
+                        controller: _nameCtrl),
 
-                    _buildLabel('Description'),
-                    _buildTextField(_descCtrl, 'Type description...', maxLines: 5),
+                    buildFormLabel('Description'),
+                    buildFormTextField('Type description...',
+                        controller: _descCtrl, maxLines: 5),
 
-                    _buildLabel('Location'),
-                    _buildTextField(_locationCtrl, 'Type location...'),
+                    buildFormLabel('Location'),
+                    buildFormTextField('Type location...',
+                        controller: _locationCtrl),
 
-                    _buildLabel('Price Range'),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildTextField(_minPriceCtrl, 'Min (e.g. 35)',
-                              keyboardType: TextInputType.number),
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                          child: Text(
-                            '–',
-                            style: TextStyle(
-                              fontFamily: 'Afacad',
-                              fontSize: 18,
-                              color: warmTangerine,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: _buildTextField(_maxPriceCtrl, 'Max (e.g. 150)',
-                              keyboardType: TextInputType.number),
-                        ),
-                      ],
+                    buildFormLabel('Price Range'),
+                    buildRangeFields(
+                      leftHint: 'Min (e.g. 35)',
+                      rightHint: 'Max (e.g. 150)',
+                      leftController: _minPriceCtrl,
+                      rightController: _maxPriceCtrl,
+                      keyboardType: TextInputType.number,
                     ),
 
-                    _buildLabel('Opening Hours'),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildTextField(_openCtrl, 'Open (e.g. 06:00)'),
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                          child: Text(
-                            '–',
-                            style: TextStyle(
-                              fontFamily: 'Afacad',
-                              fontSize: 18,
-                              color: warmTangerine,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: _buildTextField(_closeCtrl, 'Close (e.g. 20:00)'),
-                        ),
-                      ],
+                    buildFormLabel('Opening Hours'),
+                    buildRangeFields(
+                      leftHint: 'Open (e.g. 06:00)',
+                      rightHint: 'Close (e.g. 20:00)',
+                      leftController: _openCtrl,
+                      rightController: _closeCtrl,
                     ),
 
-                    _buildLabel('Facebook Page / Account'),
-                    _buildTextField(_fbCtrl, 'Type Facebook page or account...'),
-                    GestureDetector(
-                      onTap: () => setState(() => _showTags = !_showTags),
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 10),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: warmTangerine),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                const Text(
-                                  'Tags',
-                                  style: TextStyle(
-                                    fontFamily: 'Afacad',
-                                    color: warmTangerine,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                if (_selectedTags.isNotEmpty) ...[
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: warmTangerine.withOpacity(0.12),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      '${_selectedTags.length} selected',
-                                      style: const TextStyle(
-                                        fontFamily: 'Afacad',
-                                        color: warmTangerine,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                            Icon(
-                              _showTags
-                                  ? Icons.keyboard_arrow_up
-                                  : Icons.keyboard_arrow_down,
-                              color: Colors.black54,
-                            ),
-                          ],
-                        ),
-                      ),
+                    buildFormLabel('Facebook Page / Account'),
+                    buildFormTextField(
+                        'Type Facebook page or account...',
+                        controller: _fbCtrl),
+
+                    AdminTagSelector(
+                      selectedTags: _selectedTags,
+                      onChanged: (updated) =>
+                          setState(() => _selectedTags = updated),
                     ),
 
-                    if (_showTags)
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black26),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Wrap(
-                          spacing: 8,
-                          runSpacing: 0,
-                          children: _tagList.map((tag) {
-                            return SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.25,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Checkbox(
-                                    value: _selectedTags.contains(tag),
-                                    activeColor: warmTangerine,
-                                    onChanged: (val) {
-                                      setState(() {
-                                        val!
-                                            ? _selectedTags.add(tag)
-                                            : _selectedTags.remove(tag);
-                                      });
-                                    },
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      tag,
-                                      style: const TextStyle(
-                                          fontFamily: 'Afacad', fontSize: 12),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-
-                    // ── Photo ──
-                    Center(
-                      child: TextButton(
-                        onPressed: () {},
-                        child: const Text(
-                          'Click to Change Photo',
-                          style: TextStyle(
-                              fontFamily: 'Afacad',
-                              color: warmTangerine,
-                              fontSize: 16),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      height: 150,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                            color: warmTangerine.withOpacity(0.5)),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.image_outlined,
-                          size: 50, color: Colors.black38),
-                    ),
+                    buildPhotoSection(
+                        buttonLabel: 'Click to Change Photo'),
 
                     const SizedBox(height: 28),
 
-                    // action buttons
+                    // Action buttons
                     Row(
                       children: [
-                        // Cancel
                         Expanded(
                           child: GestureDetector(
                             onTap: () => Navigator.pop(context),
@@ -342,7 +200,6 @@ class _EditRestoSheetState extends State<_EditRestoSheet> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        // Save
                         Expanded(
                           flex: 2,
                           child: GestureDetector(
@@ -351,11 +208,11 @@ class _EditRestoSheetState extends State<_EditRestoSheet> {
                               padding:
                                   const EdgeInsets.symmetric(vertical: 13),
                               decoration: BoxDecoration(
-                                color: warmTangerine,
+                                color: kWarmTangerine,
                                 borderRadius: BorderRadius.circular(10),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: warmTangerine.withOpacity(0.35),
+                                    color: kWarmTangerine.withOpacity(0.35),
                                     blurRadius: 8,
                                     offset: const Offset(0, 4),
                                   ),
@@ -386,68 +243,17 @@ class _EditRestoSheetState extends State<_EditRestoSheet> {
       ),
     );
   }
-
-  Widget _buildLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontFamily: 'Afacad',
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: Colors.black54,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(
-    TextEditingController controller,
-    String hint, {
-    int maxLines = 1,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: TextField(
-        controller: controller,
-        maxLines: maxLines,
-        keyboardType: keyboardType,
-        style: const TextStyle(fontFamily: 'Afacad', fontSize: 15),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: TextStyle(
-            fontFamily: 'Afacad',
-            color: warmTangerine.withOpacity(0.5),
-            fontStyle: FontStyle.italic,
-          ),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          enabledBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: warmTangerine),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: warmTangerine, width: 2),
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-      ),
-    );
-  }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _SheetHeader extends StatelessWidget {
   const _SheetHeader();
-
-  static const Color warmTangerine = Color(0xFFF47B42);
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Drag handle
         const SizedBox(height: 12),
         Center(
           child: Container(
@@ -460,8 +266,6 @@ class _SheetHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-
-        // Title row
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
@@ -470,13 +274,13 @@ class _SheetHeader extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: warmTangerine.withOpacity(0.1),
+                  color: kWarmTangerine.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                      color: warmTangerine.withOpacity(0.25), width: 1),
+                      color: kWarmTangerine.withOpacity(0.25), width: 1),
                 ),
                 child: const Icon(Icons.edit_outlined,
-                    color: warmTangerine, size: 20),
+                    color: kWarmTangerine, size: 20),
               ),
               const SizedBox(width: 12),
               const Column(
@@ -505,9 +309,7 @@ class _SheetHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-
-        // Divider
-        Container(height: 1, color: const Color(0xFFF9C06A)),
+        Container(height: 1, color: kGoldenBorder),
         const SizedBox(height: 12),
       ],
     );
