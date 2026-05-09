@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kaon_sa_kuan/screens/admin/admin_resto_details.dart';
+import 'package:kaon_sa_kuan/screens/admin/admin_edit_resto.dart';
 import 'package:kaon_sa_kuan/backend/services/auth_service.dart';
 import 'package:kaon_sa_kuan/screens/auth/landing.dart';
 
@@ -20,7 +21,8 @@ class AdminHomepage extends StatelessWidget {
     "openTime": "06:00",
     "closeTime": "20:00",
     "mealTags": ["Breakfast", "Lunch", "Dinner"],
-    "description": "Affordable silog and karinderya meals for students and locals."
+    "description":
+        "Affordable silog and karinderya meals for students and locals."
   };
 
   @override
@@ -66,12 +68,14 @@ class AdminHomepage extends StatelessWidget {
                       if (context.mounted) {
                         Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (_) => const LandingPage()),
+                          MaterialPageRoute(
+                              builder: (_) => const LandingPage()),
                           (route) => false,
                         );
                       }
                     },
-                    icon: const Icon(Icons.logout_rounded, color: Colors.white),
+                    icon:
+                        const Icon(Icons.logout_rounded, color: Colors.white),
                   ),
                 ],
               ),
@@ -91,7 +95,10 @@ class AdminHomepage extends StatelessWidget {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(30),
                     boxShadow: [
-                      BoxShadow(color: Colors.black12, blurRadius: 8, offset: const Offset(0, 2)),
+                      BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 8,
+                          offset: const Offset(0, 2)),
                     ],
                   ),
                   child: const TextField(
@@ -110,7 +117,7 @@ class AdminHomepage extends StatelessWidget {
           ),
         ),
 
-        // Restaurant List (Hardcoded Card)
+        // Restaurant List
         Expanded(
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -123,17 +130,41 @@ class AdminHomepage extends StatelessWidget {
                     builder: (_) => AdminRestoDetails(resto: susansResto),
                   ),
                 ),
-                 onEdit: () {
-                  // TODO: handle edit
-                },
-                onDelete: () {
-                  // TODO: handle delete
-                },
+                onEdit: () => showEditRestoModal(
+                  context,
+                  data: susansResto,
+                  onSave: (updated) {
+                    // TODO: persist updated data
+                  },
+                ),
+                onDelete: () =>
+                    _showDeleteModal(context, susansResto['name']),
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  void _showDeleteModal(BuildContext context, String restoName) {
+    showDialog(
+      context: context,
+      builder: (_) => _ConfirmModal(
+        icon: Icons.delete_outline_rounded,
+        iconColor: const Color(0xFFE91E63),
+        iconBgColor: const Color(0xFFFCE4EC),
+        title: 'Remove This Resto?',
+        message:
+            '"$restoName" will be permanently removed from the list. This can\'t be undone.',
+        confirmLabel: 'Yes, delete it.',
+        confirmColor: const Color(0xFFE91E63),
+        confirmBgColor: const Color(0xFFFCE4EC),
+        onConfirm: () {
+          Navigator.pop(context);
+          // TODO: handle delete logic
+        },
+      ),
     );
   }
 }
@@ -175,8 +206,8 @@ class _RestoCard extends StatelessWidget {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(18)),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(18)),
                   child: Container(
                     width: double.infinity,
                     height: 160,
@@ -288,6 +319,145 @@ class _IconChip extends StatelessWidget {
           ),
         ),
         child: Icon(icon, size: 24, color: Colors.black87),
+      ),
+    );
+  }
+}
+
+// ─── Shared Confirmation Modal ───────────────────────────────────────────────
+
+class _ConfirmModal extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final Color iconBgColor;
+  final String title;
+  final String message;
+  final String confirmLabel;
+  final Color confirmColor;
+  final Color confirmBgColor;
+  final VoidCallback onConfirm;
+
+  const _ConfirmModal({
+    required this.icon,
+    required this.iconColor,
+    required this.iconBgColor,
+    required this.title,
+    required this.message,
+    required this.confirmLabel,
+    required this.confirmColor,
+    required this.confirmBgColor,
+    required this.onConfirm,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      backgroundColor: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Icon badge
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: iconBgColor,
+                shape: BoxShape.circle,
+                border:
+                    Border.all(color: iconColor.withOpacity(0.3), width: 2),
+              ),
+              child: Icon(icon, color: iconColor, size: 32),
+            ),
+            const SizedBox(height: 16),
+
+            // Title
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Afacad',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // Message
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Afacad',
+                fontSize: 15,
+                color: Colors.black.withOpacity(0.5),
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Buttons
+            Row(
+              children: [
+                // Cancel
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF5F5F5),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                            color: Colors.black.withOpacity(0.1), width: 1.5),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(
+                            fontFamily: 'Afacad',
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                // Confirm
+                Expanded(
+                  child: GestureDetector(
+                    onTap: onConfirm,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: confirmBgColor,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: confirmColor, width: 1.5),
+                      ),
+                      child: Center(
+                        child: Text(
+                          confirmLabel,
+                          style: TextStyle(
+                            fontFamily: 'Afacad',
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: confirmColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

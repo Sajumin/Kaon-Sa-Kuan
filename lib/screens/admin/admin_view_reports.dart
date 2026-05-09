@@ -5,6 +5,13 @@ class AdminViewReports extends StatelessWidget {
 
   static const Color warmTangerine = Color(0xFFF47B42);
 
+  // Hardcoded reports
+  static const List<String> _reports = [
+    "Pwede po pa-remove ng Scarlet's? Matagal na po kasi sila close tapos sinuggest po siya ng app samin. Thank you po!",
+    "Pa-update po ng price ng Red Table! 100 lang dala kong pera tapos nag 110 na pala yung special nila.",
+    "Pa-update po ng closing time ng CLS. Pumunta po ko dun 8 pm pero sarado na pala sila 7 pa lang : (",
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -35,7 +42,7 @@ class AdminViewReports extends StatelessWidget {
                         'Here are the reports made by the Kuaners.',
                         style: TextStyle(
                           fontFamily: 'Afacad',
-                          fontSize: 12,
+                          fontSize: 14,
                           color: Colors.white.withOpacity(0.9),
                         ),
                       ),
@@ -47,9 +54,13 @@ class AdminViewReports extends StatelessWidget {
                       color: Colors.black.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text(
-                      '0 reports',
-                      style: TextStyle(fontFamily: 'Afacad', fontSize: 12, color: Colors.white),
+                    child: Text(
+                      '${_reports.length} ${_reports.length == 1 ? 'report' : 'reports'}',
+                      style: const TextStyle(
+                        fontFamily: 'Afacad',
+                        fontSize: 12,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ],
@@ -57,21 +68,61 @@ class AdminViewReports extends StatelessWidget {
             ),
           ),
         ),
-        const Expanded(child: _EmptyState()),
+        _reports.isEmpty
+            ? const Expanded(child: _EmptyState())
+            : Expanded(
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _reports.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) =>
+                      _ReportCard(message: _reports[index]),
+                ),
+              ),
       ],
+    );
+  }
+}
+
+class _ReportCard extends StatelessWidget {
+  final String message;
+  const _ReportCard({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFF9C06A), width: 1.5),
+      ),
+      child: Text(
+        message,
+        style: const TextStyle(
+          fontFamily: 'Afacad',
+          fontSize: 18,
+          color: Colors.black87,
+          height: 1.5,
+        ),
+      ),
     );
   }
 }
 
 class _EmptyState extends StatelessWidget {
   const _EmptyState();
+
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.receipt_long_outlined, size: 72, color: const Color(0xFFF47B42).withOpacity(0.25)),
+          Icon(Icons.receipt_long_outlined,
+              size: 72,
+              color: const Color(0xFFF47B42).withOpacity(0.25)),
           const SizedBox(height: 16),
           Text(
             'No reports yet.',
