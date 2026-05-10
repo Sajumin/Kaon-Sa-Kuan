@@ -41,24 +41,74 @@ class AdminRestoDetails extends StatelessWidget {
             ),
           ),
 
+          // ── IMAGE SECTION ─────────────────────
+          if (resto['imageUrl'] != null &&
+              resto['imageUrl'].toString().isNotEmpty)
+            Image.network(
+              resto['imageUrl'],
+              height: 220,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 220,
+                  width: double.infinity,
+                  color: Colors.grey.shade200,
+                  child: const Icon(
+                    Icons.broken_image_outlined,
+                    size: 60,
+                  ),
+                );
+              },
+            )
+          else
+            Container(
+              height: 220,
+              width: double.infinity,
+              color: Colors.grey.shade200,
+              child: const Icon(
+                Icons.image_outlined,
+                size: 60,
+              ),
+            ),
+
           // Content
           Expanded(
             child: ListView(
               padding: const EdgeInsets.all(20),
               children: [
-                _infoTile("Category", resto['foodCategory']),
-                _infoTile("Food Types",
-                    (resto['foodType'] as List).join(", ")),
-                _infoTile("Price Range",
-                    "₱${resto['averageCostMin']} - ₱${resto['averageCostMax']}"),
-                _infoTile("Budget Tags",
-                    (resto['budgetTags'] as List).join(", ")),
-                _infoTile("Location", resto['location']),
-                _infoTile("Hours",
-                    "${resto['openTime']} - ${resto['closeTime']}"),
-                _infoTile("Meals",
-                    (resto['mealTags'] as List).join(", ")),
-                _infoTile("Description", resto['description']),
+                _infoTile(
+                  "Category",
+                  resto['foodCategory'] ?? '',
+                ),
+                _infoTile(
+                  "Food Types",
+                  (resto['foodType'] as List?)?.join(", ") ?? '',
+                ),
+                _infoTile(
+                  "Price Range",
+                  "₱${resto['averageCostMin']} - ₱${resto['averageCostMax']}",
+                ),
+                _infoTile(
+                  "Budget Tags",
+                  (resto['budgetTags'] as List?)?.join(", ") ?? '',
+                ),
+                _infoTile(
+                  "Location",
+                  resto['location'] ?? '',
+                ),
+                _infoTile(
+                  "Hours",
+                  "${resto['openTime']} - ${resto['closeTime']}",
+                ),
+                _infoTile(
+                  "Meals",
+                  (resto['mealTags'] as List?)?.join(", ") ?? '',
+                ),
+                _infoTile(
+                  "Description",
+                  resto['description'] ?? '',
+                ),
               ],
             ),
           ),
