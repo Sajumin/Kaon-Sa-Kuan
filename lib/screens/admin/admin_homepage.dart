@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:kaon_sa_kuan/screens/admin/admin_resto_details.dart';
-import 'package:kaon_sa_kuan/screens/admin/admin_edit_resto.dart';
-import 'package:kaon_sa_kuan/backend/services/auth_service.dart';
 import 'package:kaon_sa_kuan/screens/auth/landing.dart';
+import 'package:kaon_sa_kuan/backend/services/auth_service.dart';
 import 'package:kaon_sa_kuan/widgets/admin/admin_app_colors.dart';
 import 'package:kaon_sa_kuan/widgets/admin/admin_confirm_modal.dart';
 import 'package:kaon_sa_kuan/widgets/admin/admin_resto_card.dart';
@@ -10,26 +11,11 @@ import 'package:kaon_sa_kuan/widgets/admin/admin_resto_card.dart';
 class AdminHomepage extends StatelessWidget {
   const AdminHomepage({super.key});
 
-  // Hardcoded restaurant data
-  final Map<String, dynamic> susansResto = const {
-    "name": "Susan's",
-    "foodCategory": "Full Meal",
-    "foodType": ["Karinderya", "Silog"],
-    "averageCostMin": 35,
-    "averageCostMax": 150,
-    "budgetTags": ["Budget Meal", "Affordable"],
-    "location": "Hollywood St.",
-    "openTime": "06:00",
-    "closeTime": "20:00",
-    "mealTags": ["Breakfast", "Lunch", "Dinner"],
-    "description": "Affordable silog and karinderya meals for students and locals.",
-  };
-
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // ── Header ────────────────────────────────────────────────────────
+        // ── HEADER ─────────────────────────────
         Container(
           width: double.infinity,
           color: kWarmTangerine,
@@ -63,18 +49,22 @@ class AdminHomepage extends StatelessWidget {
                     ],
                   ),
                   IconButton(
+                    icon: const Icon(
+                      Icons.logout_rounded,
+                      color: Colors.white,
+                    ),
                     onPressed: () async {
                       await AuthService().signOut();
                       if (context.mounted) {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => const LandingPage()),
+                            builder: (_) => const LandingPage(),
+                          ),
                           (route) => false,
                         );
                       }
                     },
-                    icon: const Icon(Icons.logout_rounded, color: Colors.white),
                   ),
                 ],
               ),
@@ -82,89 +72,106 @@ class AdminHomepage extends StatelessWidget {
           ),
         ),
 
-        // ── Search Bar ────────────────────────────────────────────────────
+        // ── SEARCH ─────────────────────────────
         Padding(
           padding: const EdgeInsets.all(20),
-          child: Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 45,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: const [
-                      BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 8,
-                          offset: Offset(0, 2)),
-                    ],
-                  ),
-                  child: const TextField(
-                    decoration: InputDecoration(
-                      hintText: 'search for restaurant...',
-                      prefixIcon:
-                          Icon(Icons.search, color: kWarmTangerine),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(vertical: 10),
-                    ),
-                  ),
-                ),
+          child: TextField(
+            decoration: InputDecoration(
+              hintText: 'search for restaurant...',
+              prefixIcon: const Icon(
+                Icons.search,
+                color: kWarmTangerine,
               ),
-              const SizedBox(width: 12),
-              const Icon(Icons.tune_rounded,
-                  color: kWarmTangerine, size: 28),
-            ],
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: BorderSide.none,
+              ),
+            ),
           ),
         ),
 
-        // ── Restaurant List ───────────────────────────────────────────────
+        // ── RESTAURANT LIST ─────────────────────
         Expanded(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            children: [
-              AdminRestoCard(
-                data: susansResto,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        AdminRestoDetails(resto: susansResto),
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('restaurants')
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    'Error: ${snapshot.error}',
                   ),
+                );
+              }
+
+              final docs = snapshot.data?.docs ?? [];
+
+              if (docs.isEmpty) {
+                return const Center(
+                  child: Text('No restaurants found'),
+                );
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
                 ),
-                onEdit: () => showEditRestoModal(
-                  context,
-                  data: susansResto,
-                  onSave: (updated) {
-                    // TODO: persist updated data
-                  },
-                ),
-                onDelete: () =>
-                    _showDeleteModal(context, susansResto['name']),
-              ),
-            ],
+                itemCount: docs.length,
+                itemBuilder: (context, index) {
+                  final data = docs[index].data() as Map<String, dynamic>;
+
+                  return AdminRestoCard(
+                    data: data,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AdminRestoDetails(
+                            resto: data,
+                          ),
+                        ),
+                      );
+                    },
+                    onEdit: () {},
+                    onDelete: () {
+                      _showDeleteModal(
+                        context,
+                        data['name'],
+                      );
+                    },
+                  );
+                },
+              );
+            },
           ),
         ),
       ],
     );
   }
 
-  void _showDeleteModal(BuildContext context, String restoName) {
+  void _showDeleteModal(BuildContext context, String name) {
     showDialog(
       context: context,
       builder: (_) => AdminConfirmModal(
         icon: Icons.delete_outline_rounded,
-        iconColor: kDeletePink,
-        iconBgColor: kDeletePinkBg,
-        title: 'Remove This Resto?',
-        message:
-            '"$restoName" will be permanently removed from the list. This can\'t be undone.',
-        confirmLabel: 'Yes, delete it.',
-        confirmColor: kDeletePink,
-        confirmBgColor: kDeletePinkBg,
+        iconColor: Colors.red,
+        iconBgColor: Colors.red.shade50,
+        title: 'Delete Restaurant?',
+        message: '"$name" will be permanently deleted.',
+        confirmLabel: 'Delete',
+        confirmColor: Colors.red,
+        confirmBgColor: Colors.red.shade50,
         onConfirm: () {
           Navigator.pop(context);
-          // TODO: handle delete logic
         },
       ),
     );
