@@ -4,6 +4,9 @@ import 'package:flutter/foundation.dart';
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  // Getter to get current user
+  User? get currentUser => _auth.currentUser;
+
   // For Guests: No UI, no password, just access
   Future<User?> signInAnonymously() async {
     try {
@@ -25,7 +28,17 @@ class AuthService {
           email: email, password: password);
       return result.user;
     } catch (e) {
+      debugPrint("Admin login failed: $e");
       return null;
+    }
+  }
+
+  // SIGN OUT FUNCTION
+  Future<void> signOut() async {
+    try {
+      await _auth.signOut();
+    } catch (e) {
+      debugPrint("Sign out failed: $e");
     }
   }
 }

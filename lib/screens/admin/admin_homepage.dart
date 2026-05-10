@@ -1,44 +1,80 @@
 import 'package:flutter/material.dart';
+import 'package:kaon_sa_kuan/screens/admin/admin_resto_details.dart';
+import 'package:kaon_sa_kuan/screens/admin/admin_edit_resto.dart';
+import 'package:kaon_sa_kuan/backend/services/auth_service.dart';
+import 'package:kaon_sa_kuan/screens/auth/landing.dart';
+import 'package:kaon_sa_kuan/widgets/admin/admin_app_colors.dart';
+import 'package:kaon_sa_kuan/widgets/admin/admin_confirm_modal.dart';
+import 'package:kaon_sa_kuan/widgets/admin/admin_resto_card.dart';
 
 class AdminHomepage extends StatelessWidget {
   const AdminHomepage({super.key});
 
-  static const Color warmTangerine = Color(0xFFF47B42);
+  // Hardcoded restaurant data
+  final Map<String, dynamic> susansResto = const {
+    "name": "Susan's",
+    "foodCategory": "Full Meal",
+    "foodType": ["Karinderya", "Silog"],
+    "averageCostMin": 35,
+    "averageCostMax": 150,
+    "budgetTags": ["Budget Meal", "Affordable"],
+    "location": "Hollywood St.",
+    "openTime": "06:00",
+    "closeTime": "20:00",
+    "mealTags": ["Breakfast", "Lunch", "Dinner"],
+    "description": "Affordable silog and karinderya meals for students and locals.",
+  };
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Header
+        // ── Header ────────────────────────────────────────────────────────
         Container(
           width: double.infinity,
-          color: warmTangerine,
+          color: kWarmTangerine,
           child: SafeArea(
             bottom: false,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Good day, Admin Kuan.',
-                    style: TextStyle(
-                      fontFamily: 'Afacad',
-                      fontSize: 22,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.3,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Good day, Admin Kuan.',
+                        style: TextStyle(
+                          fontFamily: 'Afacad',
+                          fontSize: 22,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'What would you like to do?',
+                        style: TextStyle(
+                          fontFamily: 'Afacad',
+                          fontSize: 16,
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'What would you like to do?',
-                    style: TextStyle(
-                      fontFamily: 'Afacad',
-                      fontSize: 16,
-                      color: Colors.white.withOpacity(0.88),
-                      letterSpacing: 0.2,
-                    ),
+                  IconButton(
+                    onPressed: () async {
+                      await AuthService().signOut();
+                      if (context.mounted) {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const LandingPage()),
+                          (route) => false,
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.logout_rounded, color: Colors.white),
                   ),
                 ],
               ),
@@ -46,9 +82,9 @@ class AdminHomepage extends StatelessWidget {
           ),
         ),
 
-        // Search Bar Section
+        // ── Search Bar ────────────────────────────────────────────────────
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+          padding: const EdgeInsets.all(20),
           child: Row(
             children: [
               Expanded(
@@ -57,61 +93,79 @@ class AdminHomepage extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
+                          color: Colors.black12,
+                          blurRadius: 8,
+                          offset: Offset(0, 2)),
                     ],
                   ),
-                  child: TextField(
-                    style: const TextStyle(fontFamily: 'Afacad', fontSize: 15, color: Color(0xFF5A3E2B)),
+                  child: const TextField(
                     decoration: InputDecoration(
                       hintText: 'search for restaurant...',
-                      hintStyle: TextStyle(
-                        fontFamily: 'Afacad',
-                        fontSize: 15,
-                        color: const Color(0xFF5A3E2B).withOpacity(0.45),
-                      ),
-                      prefixIcon: const Icon(Icons.search, color: warmTangerine, size: 22),
+                      prefixIcon:
+                          Icon(Icons.search, color: kWarmTangerine),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                      contentPadding: EdgeInsets.symmetric(vertical: 10),
                     ),
                   ),
                 ),
               ),
               const SizedBox(width: 12),
-              const Icon(Icons.tune_rounded, color: warmTangerine, size: 28),
+              const Icon(Icons.tune_rounded,
+                  color: kWarmTangerine, size: 28),
             ],
           ),
         ),
 
-        const Expanded(child: _EmptyState()),
+        // ── Restaurant List ───────────────────────────────────────────────
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            children: [
+              AdminRestoCard(
+                data: susansResto,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        AdminRestoDetails(resto: susansResto),
+                  ),
+                ),
+                onEdit: () => showEditRestoModal(
+                  context,
+                  data: susansResto,
+                  onSave: (updated) {
+                    // TODO: persist updated data
+                  },
+                ),
+                onDelete: () =>
+                    _showDeleteModal(context, susansResto['name']),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
-}
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.storefront_outlined, size: 72, color: const Color(0xFFF47B42).withOpacity(0.25)),
-          const SizedBox(height: 16),
-          Text(
-            'No restaurants yet.',
-            style: TextStyle(
-              fontFamily: 'AdlamDisplay',
-              fontSize: 16,
-              color: const Color(0xFF5A3E2B).withOpacity(0.45),
-            ),
-          ),
-        ],
+  void _showDeleteModal(BuildContext context, String restoName) {
+    showDialog(
+      context: context,
+      builder: (_) => AdminConfirmModal(
+        icon: Icons.delete_outline_rounded,
+        iconColor: kDeletePink,
+        iconBgColor: kDeletePinkBg,
+        title: 'Remove This Resto?',
+        message:
+            '"$restoName" will be permanently removed from the list. This can\'t be undone.',
+        confirmLabel: 'Yes, delete it.',
+        confirmColor: kDeletePink,
+        confirmBgColor: kDeletePinkBg,
+        onConfirm: () {
+          Navigator.pop(context);
+          // TODO: handle delete logic
+        },
       ),
     );
   }

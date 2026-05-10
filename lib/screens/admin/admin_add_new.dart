@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:kaon_sa_kuan/backend/controllers/restaurant_controller.dart';
 import 'package:kaon_sa_kuan/config/restaurant_tags.dart';
+import 'package:kaon_sa_kuan/widgets/admin/admin_app_colors.dart';
+import 'package:kaon_sa_kuan/widgets/admin/admin_form_fields.dart';
+import 'package:kaon_sa_kuan/widgets/admin/admin_tag_selector.dart';
 
 class AddNewResto extends StatefulWidget {
   const AddNewResto({super.key});
@@ -42,7 +45,7 @@ class _AddNewRestoState extends State<AddNewResto> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: warmTangerine,
+        backgroundColor: kWarmTangerine,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -64,7 +67,7 @@ class _AddNewRestoState extends State<AddNewResto> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            border: Border.all(color: warmTangerine, width: 1),
+            border: Border.all(color: kWarmTangerine, width: 1),
             borderRadius: BorderRadius.circular(15),
           ),
           child: Column(
@@ -189,7 +192,7 @@ class _AddNewRestoState extends State<AddNewResto> {
 
               const SizedBox(height: 25),
 
-              // Submit Button
+              // Submit button
               Center(
                 child: Container(
                   width: 200,
@@ -200,7 +203,7 @@ class _AddNewRestoState extends State<AddNewResto> {
                         color: Colors.black.withOpacity(0.2),
                         blurRadius: 4,
                         offset: const Offset(0, 4),
-                      )
+                      ),
                     ],
                   ),
                   child: ElevatedButton(
