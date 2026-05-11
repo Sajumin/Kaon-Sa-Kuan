@@ -3,13 +3,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:kaon_sa_kuan/screens/admin/admin_resto_details.dart';
 import 'package:kaon_sa_kuan/screens/auth/landing.dart';
+import 'package:kaon_sa_kuan/screens/admin/admin_edit_resto.dart';
 import 'package:kaon_sa_kuan/backend/services/auth_service.dart';
+import 'package:kaon_sa_kuan/backend/services/restaurant_service.dart';
 import 'package:kaon_sa_kuan/widgets/admin/admin_app_colors.dart';
 import 'package:kaon_sa_kuan/widgets/admin/admin_confirm_modal.dart';
 import 'package:kaon_sa_kuan/widgets/admin/admin_resto_card.dart';
 
 class AdminHomepage extends StatelessWidget {
-  const AdminHomepage({super.key});
+  AdminHomepage({super.key});
+
+  final RestaurantService _restaurantService = RestaurantService();
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +30,11 @@ class AdminHomepage extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
+                  // FIXED: removed double const
+                  const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Good day, Admin Kuan.',
                         style: TextStyle(
                           fontFamily: 'Afacad',
@@ -43,11 +48,12 @@ class AdminHomepage extends StatelessWidget {
                         style: TextStyle(
                           fontFamily: 'Afacad',
                           fontSize: 16,
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white70,
                         ),
                       ),
                     ],
                   ),
+
                   IconButton(
                     icon: const Icon(
                       Icons.logout_rounded,
@@ -95,9 +101,7 @@ class AdminHomepage extends StatelessWidget {
         // ── RESTAURANT LIST ─────────────────────
         Expanded(
           child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('restaurants')
-                .snapshots(),
+            stream: _restaurantService.getRestaurantsStream(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
@@ -107,9 +111,7 @@ class AdminHomepage extends StatelessWidget {
 
               if (snapshot.hasError) {
                 return Center(
-                  child: Text(
-                    'Error: ${snapshot.error}',
-                  ),
+                  child: Text('Error: ${snapshot.error}'),
                 );
               }
 
@@ -122,12 +124,12 @@ class AdminHomepage extends StatelessWidget {
               }
 
               return ListView.builder(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 itemCount: docs.length,
                 itemBuilder: (context, index) {
-                  final data = docs[index].data() as Map<String, dynamic>;
+                  final doc = docs[index];
+                  final data = doc.data() as Map<String, dynamic>;
+                  final id = doc.id;
 
                   return AdminRestoCard(
                     data: data,
@@ -141,11 +143,23 @@ class AdminHomepage extends StatelessWidget {
                         ),
                       );
                     },
-                    onEdit: () {},
+                    onEdit: () {
+                      showEditRestoModal(
+                        context,
+                        data: data,
+                        onSave: (updated) async {
+                          await _restaurantService.updateRestaurant(
+                            id,
+                            updated,
+                          );
+                        },
+                      );
+                    },
                     onDelete: () {
                       _showDeleteModal(
                         context,
-                        data['name'],
+                        id,
+                        data['name'] ?? '',
                       );
                     },
                   );
@@ -158,7 +172,12 @@ class AdminHomepage extends StatelessWidget {
     );
   }
 
-  void _showDeleteModal(BuildContext context, String name) {
+  // ───────────────── DELETE ─────────────────
+  void _showDeleteModal(
+    BuildContext context,
+    String id,
+    String name,
+  ) {
     showDialog(
       context: context,
       builder: (_) => AdminConfirmModal(
@@ -170,8 +189,12 @@ class AdminHomepage extends StatelessWidget {
         confirmLabel: 'Delete',
         confirmColor: Colors.red,
         confirmBgColor: Colors.red.shade50,
-        onConfirm: () {
-          Navigator.pop(context);
+        onConfirm: () async {
+          await _restaurantService.deleteRestaurant(id);
+
+          if (context.mounted) {
+            Navigator.pop(context);
+          }
         },
       ),
     );

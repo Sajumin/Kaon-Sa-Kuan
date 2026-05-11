@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:image_picker/image_picker.dart';
+import 'package:kaon_sa_kuan/backend/services/cloudinary_service.dart';
 import 'package:flutter/material.dart';
 import 'package:kaon_sa_kuan/widgets/admin/admin_app_colors.dart';
 import 'package:kaon_sa_kuan/widgets/admin/admin_form_fields.dart';
@@ -34,6 +38,8 @@ class _EditRestoSheet extends StatefulWidget {
 }
 
 class _EditRestoSheetState extends State<_EditRestoSheet> {
+  final CloudinaryService _cloudinaryService = CloudinaryService();
+
   late final TextEditingController _nameCtrl;
   late final TextEditingController _descCtrl;
   late final TextEditingController _locationCtrl;
@@ -44,18 +50,23 @@ class _EditRestoSheetState extends State<_EditRestoSheet> {
   late final TextEditingController _fbCtrl;
   late Set<String> _selectedTags;
 
+  File? _selectedImage;
+  String? _imageUrl;
+  bool _isUploading = false;
+
   @override
   void initState() {
     super.initState();
     final d = widget.data;
-    _nameCtrl     = TextEditingController(text: d['name'] ?? '');
-    _descCtrl     = TextEditingController(text: d['description'] ?? '');
+    _nameCtrl = TextEditingController(text: d['name'] ?? '');
+    _descCtrl = TextEditingController(text: d['description'] ?? '');
     _locationCtrl = TextEditingController(text: d['location'] ?? '');
     _minPriceCtrl = TextEditingController(text: '${d['averageCostMin'] ?? ''}');
     _maxPriceCtrl = TextEditingController(text: '${d['averageCostMax'] ?? ''}');
-    _openCtrl     = TextEditingController(text: d['openTime'] ?? '');
-    _closeCtrl    = TextEditingController(text: d['closeTime'] ?? '');
-    _fbCtrl       = TextEditingController(text: d['facebookPage'] ?? '');
+    _openCtrl = TextEditingController(text: d['openTime'] ?? '');
+    _closeCtrl = TextEditingController(text: d['closeTime'] ?? '');
+    _fbCtrl = TextEditingController(text: d['facebookPage'] ?? '');
+    _imageUrl = d['imageUrl'];
 
     // Seed tags from mealTags + foodType
     final existing = <String>{};
@@ -81,22 +92,66 @@ class _EditRestoSheetState extends State<_EditRestoSheet> {
     super.dispose();
   }
 
-  void _handleSave() {
-    final updated = Map<String, dynamic>.from(widget.data)
-      ..['name']           = _nameCtrl.text.trim()
-      ..['description']    = _descCtrl.text.trim()
-      ..['location']       = _locationCtrl.text.trim()
-      ..['averageCostMin'] = int.tryParse(_minPriceCtrl.text.trim()) ??
-          widget.data['averageCostMin']
-      ..['averageCostMax'] = int.tryParse(_maxPriceCtrl.text.trim()) ??
-          widget.data['averageCostMax']
-      ..['openTime']       = _openCtrl.text.trim()
-      ..['closeTime']      = _closeCtrl.text.trim()
-      ..['facebookPage']   = _fbCtrl.text.trim()
-      ..['mealTags']       = _selectedTags.toList();
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
 
-    Navigator.pop(context);
-    widget.onSave(updated);
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
+
+    if (pickedFile == null) return;
+
+    setState(() {
+      _selectedImage = File(pickedFile.path);
+    });
+  }
+
+  Future<void> _handleSave() async {
+    try {
+      setState(() {
+        _isUploading = true;
+      });
+
+      String finalImageUrl = _imageUrl ?? '';
+
+      // upload new image if user selected one
+      if (_selectedImage != null) {
+        finalImageUrl =
+            (await _cloudinaryService.uploadImage(_selectedImage!)) ?? '';
+      }
+
+      final updated = Map<String, dynamic>.from(widget.data)
+        ..['name'] = _nameCtrl.text.trim()
+        ..['description'] = _descCtrl.text.trim()
+        ..['location'] = _locationCtrl.text.trim()
+        ..['averageCostMin'] = int.tryParse(_minPriceCtrl.text.trim()) ??
+            widget.data['averageCostMin']
+        ..['averageCostMax'] = int.tryParse(_maxPriceCtrl.text.trim()) ??
+            widget.data['averageCostMax']
+        ..['openTime'] = _openCtrl.text.trim()
+        ..['closeTime'] = _closeCtrl.text.trim()
+        ..['facebookPage'] = _fbCtrl.text.trim()
+        ..['mealTags'] = _selectedTags.toList()
+        ..['imageUrl'] = finalImageUrl;
+
+      if (!mounted) return;
+
+      Navigator.pop(context);
+      widget.onSave(updated);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -154,8 +209,7 @@ class _EditRestoSheetState extends State<_EditRestoSheet> {
                     ),
 
                     buildFormLabel('Facebook Page / Account'),
-                    buildFormTextField(
-                        'Type Facebook page or account...',
+                    buildFormTextField('Type Facebook page or account...',
                         controller: _fbCtrl),
 
                     AdminTagSelector(
@@ -164,8 +218,57 @@ class _EditRestoSheetState extends State<_EditRestoSheet> {
                           setState(() => _selectedTags = updated),
                     ),
 
-                    buildPhotoSection(
-                        buttonLabel: 'Click to Change Photo'),
+                    const SizedBox(height: 20),
+
+                    buildFormLabel('Restaurant Photo'),
+
+                    GestureDetector(
+                      onTap: _pickImage,
+                      child: Container(
+                        height: 200,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: kWarmTangerine),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: _selectedImage != null
+                              ? Image.file(
+                                  _selectedImage!,
+                                  fit: BoxFit.cover,
+                                )
+                              : (_imageUrl != null && _imageUrl!.isNotEmpty)
+                                  ? Image.network(
+                                      _imageUrl!,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Container(
+                                      color: Colors.grey.shade100,
+                                      child: const Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.add_a_photo_outlined,
+                                            size: 45,
+                                            color: kWarmTangerine,
+                                          ),
+                                          SizedBox(height: 10),
+                                          Text(
+                                            'Tap to change photo',
+                                            style: TextStyle(
+                                              fontFamily: 'Afacad',
+                                              color: kWarmTangerine,
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                        ),
+                      ),
+                    ),
 
                     const SizedBox(height: 28),
 
@@ -176,8 +279,7 @@ class _EditRestoSheetState extends State<_EditRestoSheet> {
                           child: GestureDetector(
                             onTap: () => Navigator.pop(context),
                             child: Container(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 13),
+                              padding: const EdgeInsets.symmetric(vertical: 13),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFF5F5F5),
                                 borderRadius: BorderRadius.circular(10),
@@ -205,8 +307,7 @@ class _EditRestoSheetState extends State<_EditRestoSheet> {
                           child: GestureDetector(
                             onTap: _handleSave,
                             child: Container(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 13),
+                              padding: const EdgeInsets.symmetric(vertical: 13),
                               decoration: BoxDecoration(
                                 color: kWarmTangerine,
                                 borderRadius: BorderRadius.circular(10),

@@ -37,6 +37,8 @@ class RestaurantController {
       imageUrl: imageUrl,
       tags: tags,
       approvedBy: FirebaseAuth.instance.currentUser!.uid,
+      status: 'approved',
+      createdByAdmin: true,
     );
 
     await _restaurantService.addRestaurant(restaurant);

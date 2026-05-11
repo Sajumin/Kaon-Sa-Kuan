@@ -34,4 +34,8 @@ class RestaurantService {
   ) async {
     await _firestore.collection('restaurants').doc(id).update(data);
   }
+
+  Stream<QuerySnapshot> getRestaurantsStream() {
+    return _firestore.collection('restaurants').snapshots();
+  }
 }

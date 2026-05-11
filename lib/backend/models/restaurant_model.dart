@@ -9,6 +9,8 @@ class RestaurantModel {
   final String imageUrl;
   final List<String> tags;
   final String approvedBy;
+  final String status;
+  final bool createdByAdmin;
 
   RestaurantModel({
     required this.id,
@@ -21,6 +23,8 @@ class RestaurantModel {
     required this.imageUrl,
     required this.tags,
     required this.approvedBy,
+    required this.status,
+    required this.createdByAdmin,
   });
 
   Map<String, dynamic> toMap() {
@@ -34,6 +38,7 @@ class RestaurantModel {
       'imageUrl': imageUrl,
       'tags': tags,
       'approvedBy': approvedBy,
+      'status': status
     };
   }
 
@@ -49,6 +54,8 @@ class RestaurantModel {
       imageUrl: map['imageUrl'] ?? '',
       tags: List<String>.from(map['tags'] ?? []),
       approvedBy: map['approvedBy'] ?? '',
+      status: map['status'] ?? 'pending',
+      createdByAdmin: map['createdByAdmin'] ?? false,
     );
   }
 }

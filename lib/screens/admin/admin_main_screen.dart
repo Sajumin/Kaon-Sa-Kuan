@@ -16,7 +16,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    const AdminHomepage(),
+    AdminHomepage(),
     const AdminPendingRestos(),
     const SizedBox.shrink(), // Index 2 placeholder for "Add New"
     const AdminViewReports(),
