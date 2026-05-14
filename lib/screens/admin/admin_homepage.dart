@@ -29,7 +29,6 @@ class AdminHomepage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // ── Header ────────────────────────────────────────────────────────
         Container(
           width: double.infinity,
           color: kWarmTangerine,
@@ -81,8 +80,6 @@ class AdminHomepage extends StatelessWidget {
             ),
           ),
         ),
-
-        // ── Search Bar ────────────────────────────────────────────────────
         Padding(
           padding: const EdgeInsets.all(20),
           child: Row(
@@ -118,7 +115,7 @@ class AdminHomepage extends StatelessWidget {
           ),
         ),
 
-        // ── Restaurant List ───────────────────────────────────────────────
+        // 
         Expanded(
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 20),

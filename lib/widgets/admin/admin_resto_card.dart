@@ -5,15 +5,15 @@ import 'admin_icon_chip.dart';
 /// Unified restaurant card used on both the homepage list and the
 /// pending-submissions list.
 ///
-/// Pass [onApprove] only for pending cards — it renders the green
-/// "approve" button in the footer when provided.
+/// Pass [onApprove] and [onDisapprove] only for pending cards — they render
+/// the approve/disapprove buttons in the footer when provided.
+/// Pass [onDelete] for the homepage card — it renders the delete icon chip.
 class AdminRestoCard extends StatelessWidget {
   final Map<String, dynamic> data;
   final VoidCallback onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
-
-  /// When non-null, an "approve" button is shown at the bottom of the card.
+  final VoidCallback? onDisapprove;
   final VoidCallback? onApprove;
 
   const AdminRestoCard({
@@ -22,6 +22,7 @@ class AdminRestoCard extends StatelessWidget {
     required this.onTap,
     this.onEdit,
     this.onDelete,
+    this.onDisapprove,
     this.onApprove,
   });
 
@@ -42,7 +43,6 @@ class AdminRestoCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Image area ──────────────────────────────────────────────
             Stack(
               children: [
                 ClipRRect(
@@ -68,9 +68,11 @@ class AdminRestoCard extends StatelessWidget {
                     children: [
                       AdminIconChip(
                           icon: Icons.edit_outlined, onTap: onEdit),
-                      const SizedBox(width: 5),
-                      AdminIconChip(
-                          icon: Icons.delete_outline, onTap: onDelete),
+                      if (onDelete != null) ...[
+                        const SizedBox(width: 5),
+                        AdminIconChip(
+                            icon: Icons.delete_outline, onTap: onDelete),
+                      ],
                     ],
                   ),
                 ),
@@ -78,8 +80,6 @@ class AdminRestoCard extends StatelessWidget {
             ),
 
             Container(height: 1.5, color: kGoldenBorder),
-
-            // ── Footer ──────────────────────────────────────────────────
             Container(
               decoration: const BoxDecoration(
                 color: kCardBg,
@@ -128,10 +128,23 @@ class AdminRestoCard extends StatelessWidget {
                     ],
                   ),
 
-                  // Approve button — only for pending cards
-                  if (onApprove != null) ...[
+                  // Approve + Disapprove buttons — only for pending cards
+                  if (onApprove != null || onDisapprove != null) ...[
                     const SizedBox(height: 12),
-                    _ApproveButton(onTap: onApprove!),
+                    Row(
+                      children: [
+                        if (onDisapprove != null)
+                          Expanded(
+                            child: _DisapproveButton(onTap: onDisapprove!),
+                          ),
+                        if (onApprove != null && onDisapprove != null)
+                          const SizedBox(width: 8),
+                        if (onApprove != null)
+                          Expanded(
+                            child: _ApproveButton(onTap: onApprove!),
+                          ),
+                      ],
+                    ),
                   ],
                 ],
               ),
@@ -166,6 +179,38 @@ class _ApproveButton extends StatelessWidget {
               fontFamily: 'Afacad',
               fontSize: 14,
               color: kApproveGreen,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DisapproveButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _DisapproveButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: kDeletePinkBg,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: kDeletePink, width: 1.5),
+        ),
+        child: const Center(
+          child: Text(
+            'disapprove',
+            style: TextStyle(
+              fontFamily: 'Afacad',
+              fontSize: 14,
+              color: kDeletePink,
               fontWeight: FontWeight.w500,
             ),
           ),

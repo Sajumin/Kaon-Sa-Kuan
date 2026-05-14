@@ -62,6 +62,8 @@ class AdminPendingRestos extends StatelessWidget {
                       ),
                       onApprove: () =>
                           _showApproveModal(context, resto['name']),
+                      onDisapprove: () =>
+                          _showDisapproveModal(context, resto['name']),
                       onEdit: () => showEditRestoModal(
                         context,
                         data: resto,
@@ -69,8 +71,6 @@ class AdminPendingRestos extends StatelessWidget {
                           // TODO: persist updated data
                         },
                       ),
-                      onDelete: () =>
-                          _showDeleteModal(context, resto['name']),
                     );
                   },
                 ),
@@ -100,22 +100,22 @@ class AdminPendingRestos extends StatelessWidget {
     );
   }
 
-  void _showDeleteModal(BuildContext context, String restoName) {
+  void _showDisapproveModal(BuildContext context, String restoName) {
     showDialog(
       context: context,
       builder: (_) => AdminConfirmModal(
-        icon: Icons.delete_outline_rounded,
+        icon: Icons.cancel_outlined,
         iconColor: kDeletePink,
         iconBgColor: kDeletePinkBg,
-        title: 'Remove This Resto?',
+        title: 'Disapprove Restaurant?',
         message:
-            '"$restoName" will be permanently removed from the submissions. This can\'t be undone.',
-        confirmLabel: 'Yes, delete it.',
+            '"$restoName" will be rejected and removed from submissions. This can\'t be undone.',
+        confirmLabel: 'Yes, disapprove it.',
         confirmColor: kDeletePink,
         confirmBgColor: kDeletePinkBg,
         onConfirm: () {
           Navigator.pop(context);
-          // TODO: handle delete logic
+          // TODO: handle disapprove logic
         },
       ),
     );
