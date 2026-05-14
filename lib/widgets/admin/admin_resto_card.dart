@@ -98,6 +98,8 @@ class AdminRestoCard extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),
                   Row(
@@ -105,24 +107,32 @@ class AdminRestoCard extends StatelessWidget {
                       const Icon(Icons.location_on_outlined,
                           size: 15, color: kWarmTangerine),
                       const SizedBox(width: 3),
-                      Text(
-                        data['location'],
-                        style: const TextStyle(
-                          fontFamily: 'Afacad',
-                          fontSize: 20,
-                          color: kWarmTangerine,
+                      Flexible(
+                        child: Text(
+                          data['location'],
+                          style: const TextStyle(
+                            fontFamily: 'Afacad',
+                            fontSize: 18,
+                            color: kWarmTangerine,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const Spacer(),
+                      const SizedBox(width: 8),
                       const Icon(Icons.receipt_outlined,
                           size: 15, color: kWarmTangerine),
                       const SizedBox(width: 3),
-                      Text(
-                        priceRange,
-                        style: const TextStyle(
-                          fontFamily: 'Afacad',
-                          fontSize: 20,
-                          color: kWarmTangerine,
+                      Flexible(
+                        child: Text(
+                          priceRange,
+                          style: const TextStyle(
+                            fontFamily: 'Afacad',
+                            fontSize: 16,
+                            color: kWarmTangerine,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],

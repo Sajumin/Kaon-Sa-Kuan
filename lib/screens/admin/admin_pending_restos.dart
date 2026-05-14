@@ -25,6 +25,20 @@ class AdminPendingRestos extends StatelessWidget {
       "description":
           "Affordable silog and karinderya meals for students and locals.",
     },
+    {
+      "name": "Campus Bites",
+      "foodCategory": "Quick Meals",
+      "foodType": ["Burgers", "Silog"],
+      "averageCostMin": 45,
+      "averageCostMax": 160,
+      "budgetTags": ["Budget Meal", "Student Favorite"],
+      "location": "CUB",
+      "openTime": "09:00",
+      "closeTime": "21:00",
+      "mealTags": ["Lunch", "Dinner"],
+      "description":
+          "Affordable burgers, rice meals, and snacks for students.",
+    },
   ];
 
   @override
@@ -46,31 +60,75 @@ class AdminPendingRestos extends StatelessWidget {
                 ),
               )
             : Expanded(
-                child: ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _pendingRestos.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final resto = _pendingRestos[index];
-                    return AdminRestoCard(
-                      data: resto,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => AdminRestoDetails(resto: resto),
+                child: Builder(
+                  builder: (context) {
+                    final width = MediaQuery.of(context).size.width;
+                    final isTablet = width >= 700;
+
+                    if (isTablet) {
+                      final cardWidth = (width - 32 - 16) / 2;
+                      return SingleChildScrollView(
+                        padding: const EdgeInsets.all(16),
+                        child: Wrap(
+                          spacing: 16,
+                          runSpacing: 16,
+                          children: _pendingRestos.map((resto) {
+                            return SizedBox(
+                              width: cardWidth,
+                              child: AdminRestoCard(
+                                data: resto,
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        AdminRestoDetails(resto: resto),
+                                  ),
+                                ),
+                                onApprove: () => _showApproveModal(
+                                    context, resto['name']),
+                                onDisapprove: () => _showDisapproveModal(
+                                    context, resto['name']),
+                                onEdit: () => showEditRestoModal(
+                                  context,
+                                  data: resto,
+                                  onSave: (updated) {
+                                    // TODO: persist updated data
+                                  },
+                                ),
+                              ),
+                            );
+                          }).toList(),
                         ),
-                      ),
-                      onApprove: () =>
-                          _showApproveModal(context, resto['name']),
-                      onDisapprove: () =>
-                          _showDisapproveModal(context, resto['name']),
-                      onEdit: () => showEditRestoModal(
-                        context,
-                        data: resto,
-                        onSave: (updated) {
-                          // TODO: persist updated data
-                        },
-                      ),
+                      );
+                    }
+
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _pendingRestos.length,
+                      itemBuilder: (context, index) {
+                        final resto = _pendingRestos[index];
+                        return AdminRestoCard(
+                          data: resto,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  AdminRestoDetails(resto: resto),
+                            ),
+                          ),
+                          onApprove: () =>
+                              _showApproveModal(context, resto['name']),
+                          onDisapprove: () =>
+                              _showDisapproveModal(context, resto['name']),
+                          onEdit: () => showEditRestoModal(
+                            context,
+                            data: resto,
+                            onSave: (updated) {
+                              // TODO: persist updated data
+                            },
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

@@ -11,19 +11,36 @@ class AdminHomepage extends StatelessWidget {
   const AdminHomepage({super.key});
 
   // Hardcoded restaurant data
-  final Map<String, dynamic> susansResto = const {
-    "name": "Susan's",
-    "foodCategory": "Full Meal",
-    "foodType": ["Karinderya", "Silog"],
-    "averageCostMin": 35,
-    "averageCostMax": 150,
-    "budgetTags": ["Budget Meal", "Affordable"],
-    "location": "Hollywood St.",
-    "openTime": "06:00",
-    "closeTime": "20:00",
-    "mealTags": ["Breakfast", "Lunch", "Dinner"],
-    "description": "Affordable silog and karinderya meals for students and locals.",
-  };
+  final List<Map<String, dynamic>> restos = const [
+    {
+      "name": "Susan's",
+      "foodCategory": "Full Meal",
+      "foodType": ["Karinderya", "Silog"],
+      "averageCostMin": 35,
+      "averageCostMax": 150,
+      "budgetTags": ["Budget Meal", "Affordable"],
+      "location": "Hollywood St.",
+      "openTime": "06:00",
+      "closeTime": "20:00",
+      "mealTags": ["Breakfast", "Lunch", "Dinner"],
+      "description":
+          "Affordable silog and karinderya meals for students and locals.",
+    },
+    {
+      "name": "Kuan's Eatery",
+      "foodCategory": "Snacks & Meals",
+      "foodType": ["Street Food", "Silog"],
+      "averageCostMin": 50,
+      "averageCostMax": 180,
+      "budgetTags": ["Student Friendly", "Affordable"],
+      "location": "New York St.",
+      "openTime": "08:00",
+      "closeTime": "22:00",
+      "mealTags": ["Breakfast", "Lunch", "Dinner"],
+      "description":
+          "Street food favorites and sulit meals near campus.",
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -68,12 +85,16 @@ class AdminHomepage extends StatelessWidget {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => const LandingPage()),
+                            builder: (_) => const LandingPage(),
+                          ),
                           (route) => false,
                         );
                       }
                     },
-                    icon: const Icon(Icons.logout_rounded, color: Colors.white),
+                    icon: const Icon(
+                      Icons.logout_rounded,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
               ),
@@ -92,16 +113,19 @@ class AdminHomepage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(30),
                     boxShadow: const [
                       BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 8,
-                          offset: Offset(0, 2)),
+                        color: Colors.black12,
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
                     ],
                   ),
                   child: const TextField(
                     decoration: InputDecoration(
                       hintText: 'search for restaurant...',
-                      prefixIcon:
-                          Icon(Icons.search, color: kWarmTangerine),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: kWarmTangerine,
+                      ),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(vertical: 10),
                     ),
@@ -109,37 +133,85 @@ class AdminHomepage extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const Icon(Icons.tune_rounded,
-                  color: kWarmTangerine, size: 28),
+              const Icon(
+                Icons.tune_rounded,
+                color: kWarmTangerine,
+                size: 28,
+              ),
             ],
           ),
         ),
-
-        // 
         Expanded(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            children: [
-              AdminRestoCard(
-                data: susansResto,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        AdminRestoDetails(resto: susansResto),
+          child: Builder(
+            builder: (context) {
+              final width = MediaQuery.of(context).size.width;
+              final isTablet = width >= 700;
+
+              if (isTablet) {
+                // Two-column wrap layout for tablets — cards size to content
+                final cardWidth = (width - 40 - 16) / 2;
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 4),
+                  child: Wrap(
+                    spacing: 16,
+                    runSpacing: 16,
+                    children: restos.map((resto) {
+                      return SizedBox(
+                        width: cardWidth,
+                        child: AdminRestoCard(
+                          data: resto,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  AdminRestoDetails(resto: resto),
+                            ),
+                          ),
+                          onEdit: () => showEditRestoModal(
+                            context,
+                            data: resto,
+                            onSave: (updated) {
+                              // TODO: persist updated data
+                            },
+                          ),
+                          onDelete: () =>
+                              _showDeleteModal(context, resto['name']),
+                        ),
+                      );
+                    }).toList(),
                   ),
-                ),
-                onEdit: () => showEditRestoModal(
-                  context,
-                  data: susansResto,
-                  onSave: (updated) {
-                    // TODO: persist updated data
-                  },
-                ),
-                onDelete: () =>
-                    _showDeleteModal(context, susansResto['name']),
-              ),
-            ],
+                );
+              }
+
+              // Single-column list for phones — cards size to content
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20, vertical: 4),
+                itemCount: restos.length,
+                itemBuilder: (context, index) {
+                  final resto = restos[index];
+                  return AdminRestoCard(
+                    data: resto,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => AdminRestoDetails(resto: resto),
+                      ),
+                    ),
+                    onEdit: () => showEditRestoModal(
+                      context,
+                      data: resto,
+                      onSave: (updated) {
+                        // TODO: persist updated data
+                      },
+                    ),
+                    onDelete: () =>
+                        _showDeleteModal(context, resto['name']),
+                  );
+                },
+              );
+            },
           ),
         ),
       ],
